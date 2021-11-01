@@ -49,7 +49,9 @@ Window::Window(int width, int height, const wchar_t* name) noexcept
 
 	//Make client region as requested 
 	// And calculates total windows size including title, borders etc
-	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
+	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE))) {
+		throw CHWND_LAST_EXCEPT();
+	}
 	hWnd = CreateWindow(
 		WindowClass::GetName(), name,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
@@ -58,6 +60,11 @@ Window::Window(int width, int height, const wchar_t* name) noexcept
 		nullptr, nullptr,
 		WindowClass::GetInstance(), this
 	);
+
+	if (hWnd == nullptr)
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
 
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 }

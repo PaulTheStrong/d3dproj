@@ -31,6 +31,5 @@ int WINAPI WinMain(
 	catch (...)
 	{
 		MessageBoxA(nullptr, "No details available", "Unknown exception", MB_OK | MB_ICONEXCLAMATION);
-
 	}
 }
