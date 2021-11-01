@@ -6,17 +6,31 @@ int WINAPI WinMain(
 	LPSTR		lpCmdLine,
 	int			nCmdShow
 ) {
+	try {
+		Window wnd(800, 300, L"Game engine");
 
-	Window wnd(800, 300, L"Game engine");
-	
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, NULL, 0, 0)) > 0) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		MSG msg;
+		BOOL gResult;
+		while ((gResult = GetMessage(&msg, NULL, 0, 0)) > 0) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		if (gResult == -1) {
+			return -1;
+		}
+		return msg.wParam;
 	}
-	if (gResult == -1) {
-		return -1;
+	catch (EngineException& e) 
+	{
+		MessageBoxA(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
 	}
-	return msg.wParam;
+	catch (std::exception& e) 
+	{
+		MessageBoxA(nullptr, e.what(), "Standard exceptio", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (...)
+	{
+		MessageBoxA(nullptr, "No details available", "Unknown exception", MB_OK | MB_ICONEXCLAMATION);
+
+	}
 }
