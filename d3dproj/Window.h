@@ -1,8 +1,22 @@
 #pragma once
 #include "CoolWin.h"
+#include "EngineException.h"
 
 class Window {
 private:
+	class Exception : public EngineException
+	{
+	public:
+		Exception(int line, const char* file, HRESULT hr) noexcept;
+		const char* what() const noexcept override;
+		virtual const char* GetType() const noexcept;
+		static std::string TranslateErrorCode(HRESULT hr) noexcept;
+		HRESULT GetErrorCode() const noexcept;
+		std::string GetErrorString() const noexcept;
+	private:
+		HRESULT hr;
+	};
+
 	class WindowClass {
 	public:
 		static const wchar_t* GetName() noexcept;
@@ -32,3 +46,5 @@ private:
 	int height;
 	HWND hWnd;
 };
+
+#define CHWND_EXCEPT (hr) WINDOW::Exception(__LINE__, __FILE__,hr)
