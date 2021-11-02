@@ -14,11 +14,12 @@ int WINAPI WinMain(
 	}
 	catch (EngineException& e) 
 	{
-		MessageBoxA(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
+		const char* what = e.what();
+		MessageBoxA(nullptr, what, e.GetType(), MB_OK | MB_ICONEXCLAMATION);
 	}
 	catch (std::exception& e) 
 	{
-		MessageBoxA(nullptr, e.what(), "Standard exceptio", MB_OK | MB_ICONEXCLAMATION);
+		MessageBoxA(nullptr, e.what(), "Standard exception", MB_OK | MB_ICONEXCLAMATION);
 	}
 	catch (...)
 	{
