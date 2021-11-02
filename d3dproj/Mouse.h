@@ -19,6 +19,8 @@ public:
 			WheelUp,
 			WheelDown,
 			Move,
+			Enter,
+			Leave,
 			Invalid
 		};
 	private:
@@ -82,11 +84,14 @@ public:
 	int GetPosY() const noexcept;
 	bool LeftIsPressed() const noexcept;
 	bool RightIsPressed() const noexcept;
+	bool IsInWindow() const noexcept;
 	Mouse::Event Read() noexcept;
 	bool IsEmpty() const noexcept;
 	void Flush() noexcept;
 private:
 	void OnMouseMove(int x, int y) noexcept;
+	void OnMouseLeave() noexcept;
+	void OnMouseEnter() noexcept;
 	void OnLeftButtonPressed(int x, int y) noexcept;
 	void OnLeftButtonReleased(int x, int y) noexcept;
 	void OnRightButtonPressed(int x, int y) noexcept;
@@ -100,6 +105,7 @@ private:
 	int y;
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;
+	bool isInWindow;
 	std::queue<Event> buffer;
 };
 

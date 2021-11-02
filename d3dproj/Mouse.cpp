@@ -25,6 +25,11 @@ bool Mouse::RightIsPressed() const noexcept
     return rightIsPressed;
 }
 
+bool Mouse::IsInWindow() const noexcept
+{
+    return isInWindow;
+}
+
 Mouse::Event Mouse::Read() noexcept
 {
     if (buffer.size() > 0) 
@@ -37,7 +42,6 @@ Mouse::Event Mouse::Read() noexcept
     {
         return Event();
     }
-    return Mouse::Event();
 }
 
 bool Mouse::IsEmpty() const noexcept
@@ -55,6 +59,20 @@ void Mouse::OnMouseMove(int x, int y) noexcept
     this->x = x;
     this->y = y;
     buffer.push(Mouse::Event(Event::Type::Move, *this));
+    TrimBuffer();
+}
+
+void Mouse::OnMouseLeave() noexcept
+{
+    isInWindow = false;
+    buffer.push(Mouse::Event(Event::Type::Leave, *this));
+    TrimBuffer();
+}
+
+void Mouse::OnMouseEnter() noexcept
+{
+    isInWindow = true;
+    buffer.push(Mouse::Event(Event::Type::Enter, *this));
     TrimBuffer();
 }
 
