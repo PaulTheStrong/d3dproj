@@ -14,6 +14,10 @@ int WINAPI WinMain(
 		while ((gResult = GetMessage(&msg, NULL, 0, 0)) > 0) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+			if (wnd.kbd.KeyIsPressed(VK_SPACE))
+			{
+				MessageBox(nullptr, L"Smth happend", L"Space key has been pressed", 0);
+			}
 		}
 		if (gResult == -1) {
 			return -1;
