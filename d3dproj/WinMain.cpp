@@ -1,4 +1,6 @@
 #include "Window.h"
+#include <sstream>
+#include "App.h"
 
 int WINAPI WinMain(
 	HINSTANCE	hInstance,
@@ -7,22 +9,8 @@ int WINAPI WinMain(
 	int			nCmdShow
 ) {
 	try {
-		Window wnd(800, 300, L"Game engine");
-
-		MSG msg;
-		BOOL gResult;
-		while ((gResult = GetMessage(&msg, NULL, 0, 0)) > 0) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-			if (wnd.kbd.KeyIsPressed(VK_SPACE))
-			{
-				MessageBox(nullptr, L"Smth happend", L"Space key has been pressed", 0);
-			}
-		}
-		if (gResult == -1) {
-			return -1;
-		}
-		return msg.wParam;
+		App app;
+		app.Go();
 	}
 	catch (EngineException& e) 
 	{
