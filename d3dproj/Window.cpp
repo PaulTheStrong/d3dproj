@@ -50,7 +50,7 @@ Window::Window(int width, int height, const wchar_t* name) noexcept
 
 	//Make client region as requested 
 	// And calculates total windows size including title, borders etc
-	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE))) {
+	if (AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0) {
 		throw CHWND_LAST_EXCEPT();
 	}
 	hWnd = CreateWindow(
@@ -223,4 +223,12 @@ HRESULT Window::Exception::GetErrorCode() const noexcept
 std::string Window::Exception::GetErrorString() const noexcept
 {
 	return TranslateErrorCode(hr);
+}
+
+void Window::SetTitle(const std::wstring& title)
+{
+	if (SetWindowText(hWnd, title.c_str()) == 0)
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
 }
