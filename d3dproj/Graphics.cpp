@@ -1,6 +1,8 @@
 #include "Graphics.h"
 #include <sstream>
 
+namespace wrl = Microsoft::WRL;
+
 #pragma comment(lib, "d3d11.lib")
 
 #define GFX_EXCEPT_NOINFO(hr) Graphics::HrException( __LINE__,__FILE__,(hr) )
@@ -56,31 +58,11 @@ Graphics::Graphics(HWND hWnd) {
 		nullptr,
 		&pContext
 	));
-	ID3D11Resource* pBackBuffer = nullptr;
-	GFX_THROW_INFO(pSwap->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer)));
-	hr = pDevice->CreateRenderTargetView(pBackBuffer, nullptr, &pTarget);
-	GFX_THROW_INFO(hr);
-	pBackBuffer->Release();
+	wrl::ComPtr<ID3D11Resource> pBackBuffer;
+	GFX_THROW_INFO(pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer));
+	GFX_THROW_INFO(pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget));
 }
 
-Graphics::~Graphics() {
-	if (this->pContext != nullptr) 
-	{
-		pContext->Release();
-	}
-	if (this->pSwap != nullptr)
-	{
-		pSwap->Release();
-	}
-	if (this->pDevice != nullptr)
-	{
-		pDevice->Release();
-	}
-	if (this->pTarget != nullptr)
-	{
-		pTarget->Release();
-	}
-}
 
 void Graphics::EndFrame()
 {
@@ -104,7 +86,7 @@ void Graphics::EndFrame()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red, green, blue, 1.0f };
-	pContext->ClearRenderTargetView(pTarget, color);
+	pContext->ClearRenderTargetView(pTarget.Get(), color);
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept

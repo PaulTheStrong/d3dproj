@@ -23,17 +23,7 @@ DxgiInfoManager::DxgiInfoManager()
 		throw CHWND_LAST_EXCEPT();
 	}
 	HRESULT hr;
-	GFX_THROW_NOINFO(DxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&pDxgiInfoQueue)));
-}
-
-
-
-DxgiInfoManager::~DxgiInfoManager()
-{
-	if (pDxgiInfoQueue != nullptr)
-	{
-		pDxgiInfoQueue->Release();
-	}
+	GFX_THROW_NOINFO(DxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), &pDxgiInfoQueue));
 }
 
 void DxgiInfoManager::Set() noexcept
@@ -58,7 +48,7 @@ std::vector<std::string> DxgiInfoManager::GetMessages() const
 		auto pMessage = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(bytes.get());
 		// get the message and push its description into the vector
 		GFX_THROW_NOINFO(pDxgiInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, pMessage, &messageLength));
-		messages.emplace_back(pMessage->pDescription);
+		messages.push_back(pMessage->pDescription);
 	}
 	return messages;
 }
