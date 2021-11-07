@@ -5,8 +5,10 @@
 #include <vector>
 #include <wrl.h>
 #include "DxgiInfoManager.h"
+#include <d3dcompiler.h>
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "D3DCompiler.lib")
 
 class Graphics
 {
@@ -15,6 +17,7 @@ public:
 	{
 		using EngineException::EngineException;
 	};
+
 	class HrException : public Exception
 	{
 	public:
@@ -28,6 +31,7 @@ public:
 		std::string info;
 		HRESULT hr;
 	};
+
 	class DeviceRemovedException : public HrException
 	{
 		using HrException::HrException;
@@ -36,12 +40,27 @@ public:
 	private:
 		std::string reason;
 	};
+
+	class InfoException : public Exception {
+	public:
+		InfoException(int line, const char* file, std::vector<std::string> infoMsgs) noexcept;
+		const char* what() const noexcept override;
+		const char* GetType() const noexcept override;
+		std::string GetErrorInfo() const noexcept;
+		
+	private:
+		std::string info;
+	};
+
 	Graphics(HWND hWnd);
 	Graphics(const Graphics&) = delete;
 	Graphics& operator=(const Graphics&) = delete;
 	~Graphics() = default;
 	void EndFrame();
 	void ClearBuffer(float red, float green, float blue) noexcept;
+	
+	void DrawTestTriangle();
+
 private:
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;
