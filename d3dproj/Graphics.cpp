@@ -1,7 +1,10 @@
 #include "Graphics.h"
 #include <sstream>
+#include "EngineTimer.h"
+#include <DirectXMath.h>
 
 namespace wrl = Microsoft::WRL;
+namespace dx = DirectX;
 
 #pragma comment(lib, "d3d11.lib")
 
@@ -92,23 +95,86 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	pContext->ClearRenderTargetView(pTarget.Get(), color);
 }
 
-void Graphics::DrawTestTriangle()
+void Graphics::DrawTestTriangle(float angle, float x, float y)
 {
+	HRESULT hr;
 	namespace wrl = Microsoft::WRL;
 
 	struct Vertex
 	{
-		float x;
-		float y;
+		struct {
+			float x;
+			float y;
+		} pos;
+		struct {
+			unsigned char red;
+			unsigned char green;
+			unsigned char blue;
+			unsigned char alpha = 0;
+		} color;
 	};
 
-	const Vertex vertices[] =
+	Vertex vertices[] =
 	{
-		{ 0.0f, 0.5f },
-		{ 0.5f, -0.5f },
-		{ -0.5f, -0.5f }
+		{ 0.0f, 0.5f, 255, 0, 0 },
+		{ 0.5f, -0.5f, 0, 255, 0 },
+		{ -0.5f, -0.5f, 0, 0, 255 },
+		{ -0.3f, 0.3f, 123, 213, 128},
+		{ 0.3f, 0.3f, 123, 21, 228},
+		{ 0, -0.7f, 212, 43, 21}
 	};
 
+	const unsigned short indecies[] = {
+		0, 1, 2,
+		3, 0, 2,
+		2, 1, 5,
+		0, 4, 1,
+	};
+
+	struct ConstantBuffer
+	{
+		dx::XMMATRIX transform;
+	};
+
+	dx::XMMATRIX transform;
+
+	const ConstantBuffer cb =
+	{
+		dx::XMMatrixTranspose(
+			dx::XMMatrixRotationZ(angle) * 
+			dx::XMMatrixTranslation(x, y, 0) * 
+			dx::XMMatrixScaling(0.75f, 1, 1)
+		)
+	};
+
+	//Create constant buffer to store transformation matrix
+	D3D11_BUFFER_DESC cbd = { 0 };
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbd.MiscFlags = 0;
+	cbd.ByteWidth = sizeof(cb);
+	cbd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA csd = {};
+	csd.pSysMem = &cb;
+	wrl::ComPtr<ID3D11Buffer> pConstantBuffer;
+	GFX_THROW_INFO(pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer));
+	GFX_THROW_INFO_ONLY(pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf()));
+
+	//Create indecies buffer 
+	wrl::ComPtr<ID3D11Buffer> indexBuffer;
+	D3D11_BUFFER_DESC ibd = { 0 };
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.ByteWidth = sizeof(indecies);
+	ibd.StructureByteStride = sizeof(unsigned short);
+	D3D11_SUBRESOURCE_DATA isd = {};
+	isd.pSysMem = indecies;
+	GFX_THROW_INFO(pDevice->CreateBuffer(&ibd, &isd, &indexBuffer));
+	GFX_THROW_INFO_ONLY(pContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0));
+	
 	//Create buffer description
 	D3D11_BUFFER_DESC bd = { 0 };
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -121,7 +187,6 @@ void Graphics::DrawTestTriangle()
 	sd.pSysMem = vertices;
 
 	//Create buffer for vertices to pass it to Input assembler stage
-	HRESULT hr;
 	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
 	GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
 
@@ -148,15 +213,16 @@ void Graphics::DrawTestTriangle()
 	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
 	const D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
-		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
-	pDevice->CreateInputLayout(ied, 1, pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pInputLayout);
+	pDevice->CreateInputLayout(ied, (UINT)std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pInputLayout);
 	pContext->IASetInputLayout(pInputLayout.Get());
 	//Bind render target
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
 	
 	//Set primitive topology to triangle list
-	pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//Configure viewport
 	D3D11_VIEWPORT vp;
@@ -167,7 +233,7 @@ void Graphics::DrawTestTriangle()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	GFX_THROW_INFO_ONLY(pContext->RSSetViewports(1, &vp));
-	GFX_THROW_INFO_ONLY(pContext->Draw(std::size(vertices), 0));
+	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(std::size(indecies), 0, 0));
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
