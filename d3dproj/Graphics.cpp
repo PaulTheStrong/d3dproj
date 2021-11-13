@@ -105,6 +105,7 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 		struct {
 			float x;
 			float y;
+			float z;
 		} pos;
 		struct {
 			unsigned char red;
@@ -116,19 +117,24 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 
 	Vertex vertices[] =
 	{
-		{ 0.0f, 0.5f, 255, 0, 0 },
-		{ 0.5f, -0.5f, 0, 255, 0 },
-		{ -0.5f, -0.5f, 0, 0, 255 },
-		{ -0.3f, 0.3f, 123, 213, 128},
-		{ 0.3f, 0.3f, 123, 21, 228},
-		{ 0, -0.7f, 212, 43, 21}
+		{ -1.0f, -1.0f, -1.0f,	255,	0,		0 },
+		{ 1.0f,	 -1.0f, -1.0f,	0,		255,	0 },
+		{ -1.0f, 1.0f, -1.0f,	0,		0,		255 },
+		{ 1.0f,	 1.0f, -1.0f,	255,	255,	0 },
+		{ -1.0f, -1.0f, 1.0f,	255,	0,	255 },
+		{ 1.0f,	 -1.0f, 1.0f,	0,		255,	255 },
+		{ -1.0f, 1.0f, 1.0f,	0,		0,	0 },
+		{ 1.0f,	 1.0f, 1.0f,	255,	255,	255 },
 	};
 
-	const unsigned short indecies[] = {
-		0, 1, 2,
-		3, 0, 2,
-		2, 1, 5,
-		0, 4, 1,
+	const unsigned short indices[] =
+	{
+		0,2,1, 2,3,1,
+		1,3,5, 3,7,5,
+		2,6,3, 3,6,7,
+		4,5,7, 4,7,6,
+		0,4,2, 2,4,6,
+		0,1,4, 1,5,4
 	};
 
 	struct ConstantBuffer
@@ -136,15 +142,17 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 		dx::XMMATRIX transform;
 	};
 
-	dx::XMMATRIX transform;
 
 	const ConstantBuffer cb =
 	{
-		dx::XMMatrixTranspose(
-			dx::XMMatrixRotationZ(angle) * 
-			dx::XMMatrixTranslation(x, y, 0) * 
-			dx::XMMatrixScaling(0.75f, 1, 1)
-		)
+		{
+			dx::XMMatrixTranspose(
+				dx::XMMatrixRotationZ(angle) *
+				dx::XMMatrixRotationX(angle) *
+				dx::XMMatrixTranslation(x, y, 4.0f) *
+				dx::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f, 0.5f,10.0f)
+			)
+		}
 	};
 
 	//Create constant buffer to store transformation matrix
@@ -168,10 +176,10 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	ibd.Usage = D3D11_USAGE_DEFAULT;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
-	ibd.ByteWidth = sizeof(indecies);
+	ibd.ByteWidth = sizeof(indices);
 	ibd.StructureByteStride = sizeof(unsigned short);
 	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indecies;
+	isd.pSysMem = indices;
 	GFX_THROW_INFO(pDevice->CreateBuffer(&ibd, &isd, &indexBuffer));
 	GFX_THROW_INFO_ONLY(pContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0));
 	
@@ -213,8 +221,8 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
 	const D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
-		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	pDevice->CreateInputLayout(ied, (UINT)std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pInputLayout);
 	pContext->IASetInputLayout(pInputLayout.Get());
@@ -233,7 +241,7 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	GFX_THROW_INFO_ONLY(pContext->RSSetViewports(1, &vp));
-	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(std::size(indecies), 0, 0));
+	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(std::size(indices), 0, 0));
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept

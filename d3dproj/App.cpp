@@ -24,6 +24,6 @@ void App::DoFrame()
 	static float angle = 0;
 	float x = wnd.mouse.GetPosX() / 400.0f - 1.0f;
 	float y = -(wnd.mouse.GetPosY() / 300.0f - 1.0f);
-	wnd.Gfx().DrawTestTriangle(angle += 0.1, x, y);
+	wnd.Gfx().DrawTestTriangle(angle += 0.01, x, y);
 	wnd.Gfx().EndFrame();
 }
