@@ -15,6 +15,11 @@ int Mouse::GetPosY() const noexcept
     return y;
 }
 
+int Mouse::GetWheelDelta() const noexcept
+{
+    return wheelDeltaCarry;
+}
+
 bool Mouse::LeftIsPressed() const noexcept
 {
     return leftIsPressed;

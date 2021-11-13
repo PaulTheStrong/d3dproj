@@ -24,6 +24,19 @@ void App::DoFrame()
 	static float angle = 0;
 	float x = wnd.mouse.GetPosX() / 400.0f - 1.0f;
 	float y = -(wnd.mouse.GetPosY() / 300.0f - 1.0f);
-	wnd.Gfx().DrawTestTriangle(angle += 0.01, x, y);
+	static float z = 0;
+	Mouse::Event event;;
+	do {
+		 event = wnd.mouse.Read();
+		 if (event.GetType() == Mouse::Event::Type::WheelUp) {
+			 z += 0.2;
+		 }
+		 if (event.GetType() == Mouse::Event::Type::WheelDown) {
+			 z -= 0.2;
+		 }
+	} while (event.GetType() != Mouse::Event::Type::Invalid);
+	angle += 0.01;
+	wnd.Gfx().DrawTestTriangle(angle, x, 0, z);
+	wnd.Gfx().DrawTestTriangle(-angle, x, 0, 5.0f);
 	wnd.Gfx().EndFrame();
 }
