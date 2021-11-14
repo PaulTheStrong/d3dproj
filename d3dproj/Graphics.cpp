@@ -86,6 +86,16 @@ Graphics::Graphics(HWND hWnd) {
 	pDevice->CreateDepthStencilView(pDepthStencil.Get(), &descDSV, &pDSV));
 
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
+
+	//Configure viewport
+	D3D11_VIEWPORT vp;
+	vp.Width = 800;
+	vp.Height = 600;
+	vp.MinDepth = 0;
+	vp.MaxDepth = 1;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	GFX_THROW_INFO_ONLY(pContext->RSSetViewports(1, &vp));
 }
 
 void Graphics::EndFrame()
@@ -114,180 +124,19 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	pContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
-void Graphics::DrawTestTriangle(float angle, float x, float y, float z)
+void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG)
 {
-	HRESULT hr;
-	namespace wrl = Microsoft::WRL;
+	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(count, 0, 0));
+}
 
-	struct Vertex
-	{
-		struct {
-			float x;
-			float y;
-			float z;
-		} pos;
-	};
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	this->projection = proj;
+}
 
-	Vertex vertices[] =
-	{
-		{ -1.0f, -1.0f, -1.0f,	},
-		{ 1.0f,	 -1.0f, -1.0f,	},
-		{ -1.0f, 1.0f, -1.0f,	},
-		{ 1.0f,	 1.0f, -1.0f,	},
-		{ -1.0f, -1.0f, 1.0f,	},
-		{ 1.0f,	 -1.0f, 1.0f,	},
-		{ -1.0f, 1.0f, 1.0f,	},
-		{ 1.0f,	 1.0f, 1.0f,	},
-	};
-
-	struct ConstantBuffer
-	{
-		dx::XMMATRIX transform;
-	};
-
-	const ConstantBuffer cb =
-	{
-		{
-			dx::XMMatrixRotationZ(angle) *
-			dx::XMMatrixRotationX(angle) *
-			dx::XMMatrixTranslation(x, y, z + 4.0f) *
-			dx::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f, 0.5f,10.0f)
-		}
-	};
-
-	//Create constant buffer to store transformation matrix
-	D3D11_BUFFER_DESC cbd = { 0 };
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DYNAMIC;
-	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbd.MiscFlags = 0;
-	cbd.ByteWidth = sizeof(cb);
-	cbd.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA csd = {};
-	csd.pSysMem = &cb;
-	wrl::ComPtr<ID3D11Buffer> pConstantBuffer;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer));
-	GFX_THROW_INFO_ONLY(pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf()));
-
-
-	//Create constant buffer for colors
-	struct ColorConstantBuffer
-	{
-		struct {
-			float r;
-			float g;
-			float b;
-			float a;
-		} faceColors[6];
-	};
-
-	const ColorConstantBuffer colorBuf =
-	{ 
-		{
-			{1.0f, 0.0f, 0.0f},
-			{0.0f, 1.0f, 0.0f},
-			{0.0f, 0.0f, 1.0f},
-			{1.0f, 0.0f, 1.0f},
-			{1.0f, 1.0f, 0.0f},
-			{1.0f, 1.0f, 1.0f},
-		}
-	};
-
-	//Create constant buffer to store transformation matrix
-	D3D11_BUFFER_DESC cbd2 = { 0 };
-	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd2.Usage = D3D11_USAGE_DYNAMIC;
-	cbd2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbd2.MiscFlags = 0;
-	cbd2.ByteWidth = sizeof(colorBuf);
-	cbd2.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA csd2 = {};
-	csd2.pSysMem = &colorBuf;
-	wrl::ComPtr<ID3D11Buffer> pConstantBuffer2;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2));
-	GFX_THROW_INFO_ONLY(pContext->PSSetConstantBuffers(0, 1, pConstantBuffer2.GetAddressOf()));
-
-	//Create indecies buffer 
-
-	const unsigned short indices[] =
-	{
-		0,2,1, 2,3,1,
-		1,3,5, 3,7,5,
-		2,6,3, 3,6,7,
-		4,5,7, 4,7,6,
-		0,4,2, 2,4,6,
-		0,1,4, 1,5,4
-	};
-	
-	wrl::ComPtr<ID3D11Buffer> indexBuffer;
-	D3D11_BUFFER_DESC ibd = { 0 };
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	ibd.ByteWidth = sizeof(indices);
-	ibd.StructureByteStride = sizeof(unsigned short);
-	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&ibd, &isd, &indexBuffer));
-	GFX_THROW_INFO_ONLY(pContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0));
-	
-	//Create buffer description
-	D3D11_BUFFER_DESC bd = { 0 };
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.ByteWidth = sizeof(vertices);
-	bd.StructureByteStride = sizeof(Vertex);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices;
-
-	//Create buffer for vertices to pass it to Input assembler stage
-	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-
-	//Set vertext buffer for Input assembler stage
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0;
-	pContext->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-	//Configure vertex shader
-	wrl::ComPtr<ID3DBlob> pBlob;
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(L"PixelShader.cso", &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), 0, &pPixelShader));
-	GFX_THROW_INFO_ONLY(pContext->PSSetShader(pPixelShader.Get(), nullptr, 0));
-
-	//Configure vertext shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(L"VertexShader.cso", &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-	GFX_THROW_INFO_ONLY(pContext->VSSetShader(pVertexShader.Get(), nullptr, 0));
-	
-
-	//Input (Vertex) layout (2d position only)
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
-	pDevice->CreateInputLayout(ied, (UINT)std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pInputLayout);
-	pContext->IASetInputLayout(pInputLayout.Get());
-	
-	//Set primitive topology to triangle list
-	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//Configure viewport
-	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	GFX_THROW_INFO_ONLY(pContext->RSSetViewports(1, &vp));
-	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(std::size(indices), 0, 0));
+DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+{
+	return projection;
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
