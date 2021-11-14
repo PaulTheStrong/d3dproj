@@ -36,7 +36,9 @@ void App::DoFrame()
 		 }
 	} while (event.GetType() != Mouse::Event::Type::Invalid);
 	angle += 0.01;
-	wnd.Gfx().DrawTestTriangle(angle, x, 0, z);
-	wnd.Gfx().DrawTestTriangle(-angle, x, 0, 5.0f);
+	for (int i = 0; i < 1000; i++) {
+		wnd.Gfx().DrawTestTriangle(angle, x, 0, z);
+		wnd.Gfx().DrawTestTriangle(-angle, x, 0, 5.0f);
+	}
 	wnd.Gfx().EndFrame();
 }

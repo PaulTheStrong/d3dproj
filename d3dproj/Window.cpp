@@ -1,6 +1,7 @@
 #include "Window.h"
 #include <sstream>
 #include "resource.h"
+#include "WindowThrowMacro.h"
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -28,7 +29,6 @@ Window::WindowClass::~WindowClass()
 {
 	UnregisterClass(wndClassName, GetInstance());
 }
-
 
 const wchar_t* Window::WindowClass::GetName() noexcept
 {

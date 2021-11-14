@@ -180,10 +180,12 @@
     <ClInclude Include="EngineException.h" />
     <ClInclude Include="EngineTimer.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="GraphicsThrowMacro.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowThrowMacro.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="chili.ico" />
