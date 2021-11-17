@@ -13,6 +13,6 @@ private:
 private:
 	Window wnd;
 	EngineTimer timer;
-	std::vector<std::unique_ptr<Box>> boxes;
+	std::vector<std::unique_ptr<Drawable>> objects;
 };
 
