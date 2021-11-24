@@ -6,6 +6,7 @@
 #include "GDIPlusManager.h"
 #include "Surface.h"
 #include "Sheet.h"
+#include "SkinnedBox.h"
 
 GDIPlusManager gdipm;
 
@@ -27,6 +28,8 @@ public:
 				gfx, rng, adist, ddist,
 				odist, rdist
 				);
+		case 5:
+			return std::make_unique<SkinnedBox>(gfx, rng, adist, ddist, odist, rdist);
 		}
 	}
 private:
@@ -38,7 +41,7 @@ private:
 	std::uniform_real_distribution<float> rdist{ 5.0f, 20.0f };
 	std::uniform_int_distribution<int> latdist{ 3, 100 };
 	std::uniform_int_distribution<int> longdist{ 3, 100 };
-	std::uniform_int_distribution<int> typedist{ 1, 4 };
+	std::uniform_int_distribution<int> typedist{ 1, 5 };
 };
 
 App::App() :

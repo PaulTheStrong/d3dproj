@@ -27,7 +27,7 @@ Box::Box(Graphics& gfx,
 			dx::XMFLOAT3 pos;
 		};
 
-		auto model = Cube::make<Vertex>();
+		auto model = Cube::Make<Vertex>();
 		model.Transform(dx::XMMatrixScaling(1.0f, 0.8f, 1.2f));
 
 		AddStaticBind(std::make_unique<VertexBuffer>(gfx, model.vertices));
