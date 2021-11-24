@@ -1,16 +1,18 @@
-#include "Pyramid.h"
+#include "Melon.h"
 #include "BindableBase.h"
-#include "Cone.h"
+#include "GraphicsThrowMacro.h"
+#include "Sphere.h"
 
-namespace dx = DirectX;
 
-Pyramid::Pyramid(Graphics& gfx,
+Melon::Melon(Graphics& gfx,
 	std::mt19937& rng,
 	std::uniform_real_distribution<float>& adist,
 	std::uniform_real_distribution<float>& ddist,
 	std::uniform_real_distribution<float>& odist,
 	std::uniform_real_distribution<float>& rdist,
-	std::uniform_int_distribution<int>& longdist) :
+	std::uniform_int_distribution<int>& longdist,
+	std::uniform_int_distribution<int>& latdist)
+	:
 	r(rdist(rng)),
 	droll(ddist(rng)),
 	dpitch(ddist(rng)),
@@ -22,18 +24,16 @@ Pyramid::Pyramid(Graphics& gfx,
 	theta(adist(rng)),
 	phi(adist(rng))
 {
-	if (!IsStaticInitialized()) {
-		struct Vertex
-		{
-			dx::XMFLOAT3 pos;
-		};
+	namespace dx = DirectX;
 
+	if (!IsStaticInitialized())
+	{
 		auto pvs = std::make_unique<VertexShader>(gfx, L"ColorIndexVS.cso");
 		auto pvsbc = pvs->GetByteCode();
-		AddStaticBind(std::make_unique<PixelShader>(gfx, L"ColorIndexPS.cso"));
 		AddStaticBind(std::move(pvs));
 
-		//Create constant buffer for colors
+		AddStaticBind(std::make_unique<PixelShader>(gfx, L"ColorIndexPS.cso"));
+
 		struct PixelShaderConstants
 		{
 			struct
@@ -58,25 +58,32 @@ Pyramid::Pyramid(Graphics& gfx,
 			}
 		};
 		AddStaticBind(std::make_unique<PixelConstantBuffer<PixelShaderConstants>>(gfx, cb2));
+
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
-			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
 		};
 		AddStaticBind(std::make_unique<InputLayout>(gfx, ied, pvsbc));
+
 		AddStaticBind(std::make_unique<Topology>(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 	}
+
 	struct Vertex
 	{
 		dx::XMFLOAT3 pos;
 	};
-	auto model = Cone::MakeTesselated<Vertex>(longdist(rng));
-	model.Transform(dx::XMMatrixScaling(1.0f, 1.0f, 1.5f));
+	auto model = Sphere::MakeTesselated<Vertex>(latdist(rng), longdist(rng));
+	// deform vertices of model by linear transformation
+	model.Transform(dx::XMMatrixScaling(1.0f, 1.0f, 1.2f));
+
 	AddBind(std::make_unique<VertexBuffer>(gfx, model.vertices));
+
 	AddIndexBuffer(std::make_unique<IndexBuffer>(gfx, model.indices));
+
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
 }
 
-void Pyramid::Update(float dt) noexcept
+void Melon::Update(float dt) noexcept
 {
 	roll += droll * dt;
 	pitch += dpitch * dt;
@@ -86,11 +93,11 @@ void Pyramid::Update(float dt) noexcept
 	chi += dchi * dt;
 }
 
-DirectX::XMMATRIX Pyramid::GetTransformXM() const noexcept
+DirectX::XMMATRIX Melon::GetTransformXM() const noexcept
 {
-	return DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll) *
-		DirectX::XMMatrixTranslation(r, 0.0f, 0.0f) *
-		DirectX::XMMatrixRotationRollPitchYaw(theta, phi, chi) *
-		DirectX::XMMatrixTranslation(0.0f, 0.0f, 20.0f);
+	namespace dx = DirectX;
+	return dx::XMMatrixRotationRollPitchYaw(pitch, yaw, roll) *
+		dx::XMMatrixTranslation(r, 0.0f, 0.0f) *
+		dx::XMMatrixRotationRollPitchYaw(theta, phi, chi) *
+		dx::XMMatrixTranslation(0.0f, 0.0f, 20.0f);
 }
-

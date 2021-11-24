@@ -1,8 +1,6 @@
 #include "Box.h"
 #include "BindableBase.h"
-#include "Sphere.h"
-#include "Prism.h"
-#include "Cone.h"
+#include "Cube.h"
 
 namespace dx = DirectX;
 
@@ -29,14 +27,14 @@ Box::Box(Graphics& gfx,
 			dx::XMFLOAT3 pos;
 		};
 
-		auto model = Cone::MakeTesselated<Vertex>(100);
-		model.Transform(dx::XMMatrixScaling(1.0f, 1.0f, 1.2f));
+		auto model = Cube::make<Vertex>();
+		model.Transform(dx::XMMatrixScaling(1.0f, 0.8f, 1.2f));
 
 		AddStaticBind(std::make_unique<VertexBuffer>(gfx, model.vertices));
 
-		auto pvs = std::make_unique<VertexShader>(gfx, L"VertexShader.cso");
+		auto pvs = std::make_unique<VertexShader>(gfx, L"ColorIndexVS.cso");
 		auto pvsbc = pvs->GetByteCode();
-		AddStaticBind(std::make_unique<PixelShader>(gfx, L"PixelShader.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(gfx, L"ColorIndexPS.cso"));
 		AddStaticBind(std::move(pvs));
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(gfx, model.indices));
@@ -49,7 +47,7 @@ Box::Box(Graphics& gfx,
 				float g;
 				float b;
 				float a;
-			} faceColors[6];
+			} faceColors[8];
 		};
 
 		const ColorConstantBuffer colorBuf =
