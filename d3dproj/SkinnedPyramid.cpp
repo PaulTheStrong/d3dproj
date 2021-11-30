@@ -1,18 +1,20 @@
-#include "SkinnedBox.h"
+#include "SkinnedPyramid.h"
 #include "BindableBase.h"
 #include "GraphicsThrowMacro.h"
 #include "Cube.h"
 #include "Surface.h"
 #include "Texture.h"
 #include "Sampler.h"
+#include "Pyramid.h"
+#include "Cone.h"
 
 
-SkinnedBox::SkinnedBox(Graphics& gfx,
+SkinnedPyramid::SkinnedPyramid(Graphics& gfx,
 	std::mt19937& rng,
 	std::uniform_real_distribution<float>& adist,
 	std::uniform_real_distribution<float>& ddist,
 	std::uniform_real_distribution<float>& odist,
-	std::uniform_real_distribution<float>& rdist)
+	std::uniform_real_distribution<float>& rdist, std::uniform_int_distribution<int>& longdist)
 	:
 	r(rdist(rng)),
 	droll(ddist(rng)),
@@ -38,11 +40,11 @@ SkinnedBox::SkinnedBox(Graphics& gfx,
 				float v;
 			} tex;
 		};
-		const auto model = Cube::MakeSkinned<Vertex>();
+		const auto model = Cone::MakeSkinned<Vertex>(longdist(rng));
 
 		AddStaticBind(std::make_unique<VertexBuffer>(gfx, model.vertices));
 
-		AddStaticBind(std::make_unique<Texture>(gfx, Surface::FromFile("Images\\nik.png")));
+		AddStaticBind(std::make_unique<Texture>(gfx, Surface::FromFile("Images\\konb.png")));
 
 		auto pvs = std::make_unique<VertexShader>(gfx, L"TextureVS.cso");
 		auto pvsbc = pvs->GetByteCode();
@@ -71,7 +73,7 @@ SkinnedBox::SkinnedBox(Graphics& gfx,
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
 }
 
-void SkinnedBox::Update(float dt) noexcept
+void SkinnedPyramid::Update(float dt) noexcept
 {
 	roll += droll * dt;
 	pitch += dpitch * dt;
@@ -81,7 +83,7 @@ void SkinnedBox::Update(float dt) noexcept
 	chi += dchi * dt;
 }
 
-DirectX::XMMATRIX SkinnedBox::GetTransformXM() const noexcept
+DirectX::XMMATRIX SkinnedPyramid::GetTransformXM() const noexcept
 {
 	namespace dx = DirectX;
 	return dx::XMMatrixRotationRollPitchYaw(pitch, yaw, roll) *
