@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "EngineTimer.h"
 #include "Box.h"
+#include "ImguiManager.h"
 
 class App
 {
@@ -11,8 +12,11 @@ public:
 private:
 	void DoFrame();
 private:
+	ImguiManager imgui;
 	Window wnd;
 	EngineTimer timer;
 	std::vector<std::unique_ptr<Drawable>> objects;
+	float speed_factor = 1.0f;
+	int objectCount = 200;
 };
 

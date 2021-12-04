@@ -8,6 +8,9 @@
 #include "Sheet.h"
 #include "SkinnedBox.h"
 #include "SkinnedPyramid.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx11.h"
 
 GDIPlusManager gdipm;
 
@@ -38,13 +41,13 @@ public:
 private:
 	Graphics& gfx;
 	std::mt19937 rng{ std::random_device{}() };
-	std::uniform_real_distribution<float> adist{ 0.0f, 3.1415f * 1.0f };
-	std::uniform_real_distribution<float> ddist{ 0.0f, 3.1415f * 1.0f };
-	std::uniform_real_distribution<float> odist{ 0.0f, 3.1415f * 1.2f };
-	std::uniform_real_distribution<float> rdist{ 1.0f, 3.0f };
+	std::uniform_real_distribution<float> adist{ 0.0f, 3.1415f * 0.4f };
+	std::uniform_real_distribution<float> ddist{ 0.0f, 3.1415f * 0.4f };
+	std::uniform_real_distribution<float> odist{ 0.0f, 3.1415f * 0.02f };
+	std::uniform_real_distribution<float> rdist{ 10.0f, 20.0f };
 	std::uniform_int_distribution<int> latdist{ 3, 30 };
 	std::uniform_int_distribution<int> longdist{ 3, 30 };
-	std::uniform_int_distribution<int> typedist{ 5, 6 };
+	std::uniform_int_distribution<int> typedist{ 1, 6 };
 };
 
 App::App() :
@@ -52,8 +55,8 @@ App::App() :
 {
 	DrawableFactory drawableFactory{ wnd.Gfx() };
 	
-	objects.reserve(5);
-	std::generate_n(std::back_inserter(objects), 5, drawableFactory);
+	objects.reserve(objectCount);
+	std::generate_n(std::back_inserter(objects), objectCount, drawableFactory);
 	wnd.Gfx().SetProjection( DirectX::XMMatrixPerspectiveLH( 1.0f,3.0f / 4.0f,0.5f,80.0f ) );
 }
 
@@ -70,12 +73,21 @@ int App::Go() {
 
 void App::DoFrame()
 {
-	const auto dt = timer.Mark();
-	wnd.Gfx().ClearBuffer(0.07f, 0.0f, 0.12f);
+	const auto dt = speed_factor * timer.Mark();
+	wnd.Gfx().BeginFrame(0.07f, 0.0f, 0.12f);
+
 	for (auto& d : objects)
 	{
 		d->Update(wnd.kbd.KeyIsPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(wnd.Gfx());
 	}
+
+	if (ImGui::Begin("Simulation speed"))
+	{
+		ImGui::SliderFloat("Speed factor", &speed_factor, -1.0f, 4.0f);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+	ImGui::End();
+
 	wnd.Gfx().EndFrame();
 }

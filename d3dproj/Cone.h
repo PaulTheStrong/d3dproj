@@ -80,6 +80,7 @@ public:
 			dx::XMStoreFloat3(&vertices.back().pos, v);
 			vertices.back().tex = { (float) (i / 2) / longDiv, 1.0f };
 		}
+		vertices[0].tex = { 1.0f, 1.0f };
 
 		//Center
 		unsigned short *centers = new unsigned short[longDiv];
