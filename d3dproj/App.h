@@ -3,6 +3,7 @@
 #include "EngineTimer.h"
 #include "Box.h"
 #include "ImguiManager.h"
+#include "Camera.h"
 
 class App
 {
@@ -18,5 +19,6 @@ private:
 	std::vector<std::unique_ptr<Drawable>> objects;
 	float speed_factor = 1.0f;
 	int objectCount = 200;
+	Camera cam;
 };
 

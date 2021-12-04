@@ -12,6 +12,8 @@
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 
+namespace dx = DirectX;
+
 GDIPlusManager gdipm;
 
 class DrawableFactory
@@ -57,7 +59,7 @@ App::App() :
 	
 	objects.reserve(objectCount);
 	std::generate_n(std::back_inserter(objects), objectCount, drawableFactory);
-	wnd.Gfx().SetProjection( DirectX::XMMatrixPerspectiveLH( 1.0f,3.0f / 4.0f,0.5f,80.0f ) );
+	wnd.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 50.0f));
 }
 
 int App::Go() {
@@ -75,7 +77,7 @@ void App::DoFrame()
 {
 	const auto dt = speed_factor * timer.Mark();
 	wnd.Gfx().BeginFrame(0.07f, 0.0f, 0.12f);
-
+	wnd.Gfx().SetCamera(cam.GetMatrix());
 	for (auto& d : objects)
 	{
 		d->Update(wnd.kbd.KeyIsPressed(VK_SPACE) ? 0.0f : dt);
@@ -88,6 +90,7 @@ void App::DoFrame()
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	}
 	ImGui::End();
+	cam.SpawnControlWindow();
 
 	wnd.Gfx().EndFrame();
 }

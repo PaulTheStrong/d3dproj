@@ -12,7 +12,9 @@ TransformCBuf::TransformCBuf(Graphics& gfx, const Drawable& parent)
 void TransformCBuf::Bind(Graphics& gfx) noexcept
 {
 	pVcbuf->Update(gfx,
-		parent.GetTransformXM() * gfx.GetProjection()
+		parent.GetTransformXM() *
+		gfx.GetCamera() *
+		gfx.GetProjection()
 	);
 	pVcbuf->Bind(gfx);
 }
