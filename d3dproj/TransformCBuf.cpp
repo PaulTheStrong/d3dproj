@@ -1,6 +1,6 @@
 #include "TransformCBuf.h"
 
-TransformCBuf::TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot)
+TransformCbuf::TransformCbuf(Graphics& gfx, const Drawable& parent, UINT slot)
 	:
 	parent(parent)
 {
@@ -10,7 +10,7 @@ TransformCBuf::TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot)
 	}
 }
 
-void TransformCBuf::Bind(Graphics& gfx) noexcept
+void TransformCbuf::Bind(Graphics& gfx) noexcept
 {
 	const auto modelView = parent.GetTransformXM() * gfx.GetCamera();
 	const Transforms tf =
@@ -26,4 +26,4 @@ void TransformCBuf::Bind(Graphics& gfx) noexcept
 	pVcbuf->Bind(gfx);
 }
 
-std::unique_ptr<VertexConstantBuffer<TransformCBuf::Transforms>> TransformCBuf::pVcbuf;
+std::unique_ptr<VertexConstantBuffer<TransformCbuf::Transforms>> TransformCbuf::pVcbuf;

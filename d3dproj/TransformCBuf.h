@@ -3,7 +3,7 @@
 #include "Drawable.h"
 #include <DirectXMath.h>
 
-class TransformCBuf : public Bindable
+class TransformCbuf : public Bindable
 {
 private:
 	struct Transforms
@@ -12,7 +12,7 @@ private:
 		DirectX::XMMATRIX model;
 	};
 public:
-	TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot = 0u);;
+	TransformCbuf(Graphics& gfx, const Drawable& parent, UINT slot = 0u);;
 	void Bind(Graphics& gfx) noexcept override;
 private:
 	static std::unique_ptr<VertexConstantBuffer<Transforms>> pVcbuf;

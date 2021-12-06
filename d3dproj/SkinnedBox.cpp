@@ -65,5 +65,5 @@ SkinnedBox::SkinnedBox(Graphics& gfx, std::mt19937& rng,
 		SetIndexFromStatic();
 	}
 
-	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
+	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 }

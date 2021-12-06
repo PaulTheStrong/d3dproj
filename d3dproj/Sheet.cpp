@@ -72,7 +72,7 @@ Sheet::Sheet(Graphics& gfx,
 		SetIndexFromStatic();
 	}
 
-	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
+	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 }
 
 void Sheet::Update(float dt) noexcept

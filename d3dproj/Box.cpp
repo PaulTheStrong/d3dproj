@@ -51,7 +51,7 @@ Box::Box(Graphics& gfx,
 		SetIndexFromStatic();
 	}
 
-	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
+	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 
 	struct PSMaterialConstant
 	{

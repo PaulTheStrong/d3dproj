@@ -70,7 +70,7 @@ SkinnedPyramid::SkinnedPyramid(Graphics& gfx,
 		SetIndexFromStatic();
 	}
 
-	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
+	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 }
 
 void SkinnedPyramid::Update(float dt) noexcept

@@ -80,7 +80,7 @@ Melon::Melon(Graphics& gfx,
 
 	AddIndexBuffer(std::make_unique<IndexBuffer>(gfx, model.indices));
 
-	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
+	AddBind(std::make_unique<TransformCbuf>(gfx, *this));
 }
 
 void Melon::Update(float dt) noexcept
