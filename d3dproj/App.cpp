@@ -45,6 +45,11 @@ public:
 				gfx, rng, adist, ddist, odist,
 				rdist, bdist, tdist
 				);
+		case 3:
+			return std::make_unique<Pyramid>(
+				gfx, rng, adist, ddist, odist,
+				rdist, tdist
+				);
 		}
 	}
 private:
@@ -56,7 +61,7 @@ private:
 	std::uniform_real_distribution<float> rdist{ 10.0f, 20.0f };
 	std::uniform_int_distribution<int> latdist{ 3, 30 };
 	std::uniform_int_distribution<int> longdist{ 3, 30 };
-	std::uniform_int_distribution<int> typedist{ 1, 2 };
+	std::uniform_int_distribution<int> typedist{ 1, 3 };
 	std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
 	std::uniform_int_distribution<int> tdist{ 3,30 };
 	std::uniform_real_distribution<float> cdist{ 0.0f,1.0f };
