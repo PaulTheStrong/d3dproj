@@ -1,9 +1,9 @@
 #pragma once
 
 #pragma once
-#include "DrawableBase.h"
+#include "TestObject.h"
 
-class SkinnedBox : public DrawableBase<SkinnedBox>
+class SkinnedBox : public TestObject<SkinnedBox>
 {
 public:
 	SkinnedBox(Graphics& gfx, std::mt19937& rng,
@@ -11,8 +11,6 @@ public:
 		std::uniform_real_distribution<float>& ddist,
 		std::uniform_real_distribution<float>& odist,
 		std::uniform_real_distribution<float>& rdist);
-	void Update(float dt) noexcept override;
-	DirectX::XMMATRIX GetTransformXM() const noexcept override;
 private:
 	// positional
 	float r;
