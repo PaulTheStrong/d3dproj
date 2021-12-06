@@ -5,6 +5,8 @@
 #include "ImguiManager.h"
 #include "Camera.h"
 #include "PointLight.h"
+#include <set>
+
 
 class App
 {
@@ -22,5 +24,8 @@ private:
 	int objectCount = 200;
 	Camera cam;
 	PointLight light;
+	std::vector<class Box*> boxes;
+	std::optional<int> comboBoxIndex;
+	std::set<int> boxControlIds;
 };
 

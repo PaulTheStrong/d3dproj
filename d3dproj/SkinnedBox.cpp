@@ -35,7 +35,7 @@ SkinnedBox::SkinnedBox(Graphics& gfx, std::mt19937& rng,
 		AddStaticBind(std::make_unique<Sampler>(gfx));
 
 		auto pvs = std::make_unique<VertexShader>(gfx, L"TexturedPhongVS.cso");
-		auto pvsbc = pvs->GetByteCode();
+		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
 		AddStaticBind(std::make_unique<PixelShader>(gfx, L"TexturedPhongPS.cso"));

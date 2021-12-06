@@ -20,7 +20,7 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 		AddIndexBuffer(std::make_unique<IndexBuffer>(gfx, model.indices));
 
 		auto pvs = std::make_unique<VertexShader>(gfx, L"SolidVS.cso");
-		auto pvsbc = pvs->GetByteCode();
+		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
 		AddStaticBind(std::make_unique<PixelShader>(gfx, L"SolidPS.cso"));

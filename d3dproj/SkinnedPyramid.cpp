@@ -47,7 +47,7 @@ SkinnedPyramid::SkinnedPyramid(Graphics& gfx,
 		AddStaticBind(std::make_unique<Texture>(gfx, Surface::FromFile("Images\\konb.png")));
 
 		auto pvs = std::make_unique<VertexShader>(gfx, L"TextureVS.cso");
-		auto pvsbc = pvs->GetByteCode();
+		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
 		AddStaticBind(std::make_unique<PixelShader>(gfx, L"TexturePS.cso"));
