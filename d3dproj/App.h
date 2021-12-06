@@ -4,6 +4,7 @@
 #include "Box.h"
 #include "ImguiManager.h"
 #include "Camera.h"
+#include "PointLight.h"
 
 class App
 {
@@ -20,5 +21,6 @@ private:
 	float speed_factor = 1.0f;
 	int objectCount = 200;
 	Camera cam;
+	PointLight light;
 };
 
