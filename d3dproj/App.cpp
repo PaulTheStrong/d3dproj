@@ -12,6 +12,11 @@
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "Cylinder.h"
+#include "AssetTest.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace dx = DirectX;
 
@@ -55,6 +60,11 @@ public:
 				gfx, rng, adist, ddist,
 				odist, rdist
 				);
+		case 5:
+			return std::make_unique<AssetTest>(
+				gfx, rng, adist, ddist,
+				odist, rdist, mat, 0.5f
+				);
 		}
 	}
 private:
@@ -67,7 +77,7 @@ private:
 	std::uniform_real_distribution<float> rdist{ 10.0f, 20.0f };
 	std::uniform_int_distribution<int> latdist{ 3, 30 };
 	std::uniform_int_distribution<int> longdist{ 3, 30 };
-	std::uniform_int_distribution<int> typedist{ 1, 4 };
+	std::uniform_int_distribution<int> typedist{ 5, 5 };
 	std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
 	std::uniform_int_distribution<int> tdist{ 3,30 };
 	std::uniform_real_distribution<float> cdist{ 0.0f,1.0f };
@@ -90,7 +100,7 @@ App::App() :
 		}
 	}
 
-	wnd.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 50.0f));
+	wnd.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 200.0f));
 }
 
 

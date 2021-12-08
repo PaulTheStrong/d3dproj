@@ -7,7 +7,6 @@
 #include "PointLight.h"
 #include <set>
 
-
 class App
 {
 public:
@@ -24,12 +23,13 @@ private:
 	Window wnd;
 	EngineTimer timer;
 	std::vector<std::unique_ptr<Drawable>> objects;
-	float speed_factor = 1.0f;
-	int objectCount = 200;
+	float speed_factor = 0.0f;
+	int objectCount = 1;
 	Camera cam;
 	PointLight light;
 	std::vector<class Box*> boxes;
 	std::optional<int> comboBoxIndex;
 	std::set<int> boxControlIds;
+	//std::wstring* models = { L"cup.obj", L"susanne.obj", L"house.obj"}
 };
 
