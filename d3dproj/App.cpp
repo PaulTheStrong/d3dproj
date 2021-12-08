@@ -93,23 +93,15 @@ App::App() :
 	wnd.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 50.0f));
 }
 
-int App::Go() {
-	while (true)
-	{
-		if (const auto ecode = Window::ProcessMessage())
-		{
-			return *ecode;
-		}
-		DoFrame();
-	}
-}
 
 void App::DoFrame()
 {
-	const auto dt = speed_factor * timer.Mark();
+	const auto dt = timer.Mark() * speed_factor;
 	wnd.Gfx().BeginFrame(0.07f, 0.0f, 0.12f);
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 	light.Bind(wnd.Gfx(), cam.GetMatrix());
+
+	// render geometry
 	for (auto& d : objects)
 	{
 		d->Update(wnd.kbd.KeyIsPressed(VK_SPACE) ? 0.0f : dt);
@@ -117,15 +109,30 @@ void App::DoFrame()
 	}
 	light.Draw(wnd.Gfx());
 
-	if (ImGui::Begin("Simulation speed"))
-	{
-		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	}
-	ImGui::End();
+	// imgui windows
+	SpawnSimulationWindow();
 	cam.SpawnControlWindow();
 	light.SpawnControlWindow();
-	// imgui window to adjust box instance parameters
+	SpawnBoxWindowManagerWindow();
+	SpawnBoxWindows();
+
+	// present
+	wnd.Gfx().EndFrame();
+}
+
+void App::SpawnSimulationWindow() noexcept
+{
+	if (ImGui::Begin("Simulation Speed"))
+	{
+		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
+		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Status: %s", wnd.kbd.KeyIsPressed(VK_SPACE) ? "PAUSED" : "RUNNING (hold spacebar to pause)");
+	}
+	ImGui::End();
+}
+
+void App::SpawnBoxWindowManagerWindow() noexcept
+{
 	if (ImGui::Begin("Boxes"))
 	{
 		using namespace std::string_literals;
@@ -153,12 +160,37 @@ void App::DoFrame()
 		}
 	}
 	ImGui::End();
-	// imgui box attribute control windows
-	for (auto id : boxControlIds)
+}
+
+void App::SpawnBoxWindows() noexcept
+{
+	for (auto i = boxControlIds.begin(); i != boxControlIds.end(); )
 	{
-		boxes[id]->SpawnControlWindow(id, wnd.Gfx());
+		if (!boxes[*i]->SpawnControlWindow(*i, wnd.Gfx()))
+		{
+			i = boxControlIds.erase(i);
+		}
+		else
+		{
+			i++;
+		}
 	}
+}
+
+App::~App()
+{}
 
 
-	wnd.Gfx().EndFrame();
+int App::Go()
+{
+	while (true)
+	{
+		// process all messages pending, but to not block for new messages
+		if (const auto ecode = Window::ProcessMessage())
+		{
+			// if return optional has value, means we're quitting so return exit code
+			return *ecode;
+		}
+		DoFrame();
+	}
 }

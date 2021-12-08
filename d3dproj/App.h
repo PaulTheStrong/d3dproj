@@ -12,9 +12,13 @@ class App
 {
 public:
 	App();
+	~App();
 	int Go();
 private:
 	void DoFrame();
+	void SpawnSimulationWindow() noexcept;
+	void SpawnBoxWindowManagerWindow() noexcept;
+	void SpawnBoxWindows() noexcept;
 private:
 	ImguiManager imgui;
 	Window wnd;
